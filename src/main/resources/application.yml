@@ -1,0 +1,58 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5433/postgres
+    username: postgres
+    password: 123456
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate.ddl-auto: update
+
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+resilience4j:
+  retry:
+    retry-aspect-order: 2
+    instances:
+      insertNoteRetry:
+        max-attempts: 3
+        wait-duration: 4s
+        enable-exponential-backoff: true
+        retry-exceptions:
+          - feign.RetryableException
+          - java.net.ConnectException
+      getAllNotesRetry:
+        max-attempts: 3
+        wait-duration: 4s
+        enable-exponential-backoff: true
+        retry-exceptions:
+          - feign.RetryableException
+          - java.net.ConnectException
+  circuitbreaker:
+    circuit-breaker-aspect-order: 1
+    instances:
+      insertNoteCircuitBreaker:
+        wait-duration-in-open-state: 1m
+        permitted-number-of-calls-in-half-open-state: 3
+        sliding-window-type: count-based
+        sliding-window-size: 5
+        minimum-number-of-calls: 5
+        slow-call-duration-threshold: 10s
+        slow-call-rate-threshold: 60
+        failure-rate-threshold: 60
+      getAllNotesCircuitBreaker:
+        wait-duration-in-open-state: 1m
+        permitted-number-of-calls-in-half-open-state: 3
+        sliding-window-type: count-based
+        sliding-window-size: 5
+        minimum-number-of-calls: 5
+        slow-call-duration-threshold: 10s
+        slow-call-rate-threshold: 60
+        failure-rate-threshold: 60
